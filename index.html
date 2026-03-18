@@ -11,7 +11,6 @@
 </head>
 <body>
 
-  <!-- Navbar -->
   <nav class="navbar">
     <a href="index.html" class="nav-logo">Vault<span>edd</span></a>
     <div class="nav-links">
@@ -26,7 +25,7 @@
     </div>
   </nav>
 
-  <!-- Top ad -->
+  <!-- Top leaderboard ad -->
   <div class="ad-wrap" style="background:var(--bg2);border-bottom:1px solid var(--border);padding:0.75rem;">
     <span class="ad-label">Advertisement</span>
     <ins class="adsbygoogle ad-slot ad-leaderboard" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -49,11 +48,16 @@
     </div>
   </section>
 
-  <!-- Featured + articles -->
+  <!-- Latest articles -->
   <div class="section">
-    <div class="section-title">Latest Mysteries <span>Updated Daily</span></div>
+    <div class="section-title">
+      Latest Mysteries
+      <span id="live-indicator" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#10b981;">
+        <span style="width:7px;height:7px;border-radius:50%;background:#10b981;animation:livepulse 2s infinite;display:inline-block;"></span>
+        Live
+      </span>
+    </div>
     <div class="articles-grid" id="articles-grid">
-      <!-- Skeletons while loading -->
       <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
         <div style="height:380px;" class="skeleton"></div>
         <div style="height:380px;" class="skeleton"></div>
@@ -65,18 +69,20 @@
   </div>
 
   <!-- Mid ad -->
-  <div class="ad-wrap section" style="padding-top:0;">
+  <div class="ad-wrap section" style="padding-top:0;padding-bottom:0;">
     <span class="ad-label">Advertisement</span>
     <ins class="adsbygoogle ad-slot ad-responsive" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
   <!-- More articles -->
-  <div class="section" style="padding-top:0;">
-    <div class="section-title">More From The Vault <span id="more-label"></span></div>
-    <div class="articles-grid" id="more-grid"></div>
-    <div style="text-align:center;margin-top:2rem;">
-      <button id="load-more-btn" class="btn-read" onclick="loadMore()" style="display:none;">Load More Mysteries</button>
+  <div class="section" style="padding-top:1.5rem;">
+    <div id="more-section" style="display:none;">
+      <div class="section-title">More From The Vault</div>
+      <div class="articles-grid" id="more-grid"></div>
+      <div style="text-align:center;margin-top:2rem;">
+        <button id="load-more-btn" class="btn-read" onclick="loadMore()" style="display:none;">Load More Mysteries</button>
+      </div>
     </div>
   </div>
 
@@ -87,12 +93,11 @@
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
-  <!-- Footer -->
   <footer>
     <div class="footer-inner">
       <div>
         <div class="footer-brand">Vault<span>edd</span></div>
-        <p class="footer-desc">Your daily source for mysteries, paranormal events, cryptids and unexplained phenomena. New articles published every day.</p>
+        <p class="footer-desc">Your daily source for mysteries, paranormal events, cryptids and unexplained phenomena. New articles published every day automatically.</p>
       </div>
       <div>
         <div class="footer-col-title">Categories</div>
@@ -119,101 +124,123 @@
     </div>
   </footer>
 
+  <style>
+    @keyframes livepulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.8);} }
+  </style>
+
   <script type="module">
     import { db } from './js/firebase.js';
-    import { collection, query, orderBy, limit, startAfter, getDocs, where } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { collection, query, orderBy, limit, where,
+             onSnapshot, getDocs, startAfter } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-    let lastDoc = null;
     let currentCat = 'all';
-    let allArticles = [];
+    let lastDoc    = null;
+    let unsubscribe = null;
 
-    async function loadArticles(cat = 'all') {
-      currentCat = cat;
-      lastDoc = null;
+    // ── Realtime listener — auto updates when new article published ──
+    function listenArticles(cat) {
+      if (unsubscribe) unsubscribe(); // stop previous listener
+
       const grid = document.getElementById('articles-grid');
       const moreGrid = document.getElementById('more-grid');
       grid.innerHTML = '';
       moreGrid.innerHTML = '';
+      document.getElementById('more-section').style.display = 'none';
+      document.getElementById('load-more-btn').style.display = 'none';
 
-      try {
-        let q = cat === 'all'
-          ? query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(7))
-          : query(collection(db,'articles'), where('category','==',cat), orderBy('publishedAt','desc'), limit(7));
+      // Show skeletons while loading
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+          <div style="height:380px;" class="skeleton"></div>
+          <div style="height:380px;" class="skeleton"></div>
+        </div>
+        <div style="height:280px;" class="skeleton"></div>
+        <div style="height:280px;" class="skeleton"></div>
+        <div style="height:280px;" class="skeleton"></div>`;
 
-        const snap = await getDocs(q);
-        allArticles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        lastDoc = snap.docs[snap.docs.length - 1];
+      const q = cat === 'all'
+        ? query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(7))
+        : query(collection(db,'articles'), where('category','==',cat), orderBy('publishedAt','desc'), limit(7));
 
-        if (allArticles.length === 0) {
-          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--text-muted);">
-            <div style="font-size:48px;margin-bottom:1rem;">🔍</div>
-            <div style="font-size:18px;">No articles yet — check back tomorrow!</div>
-          </div>`;
+      // onSnapshot = auto updates in real time when Firestore changes
+      unsubscribe = onSnapshot(q, (snap) => {
+        if (snap.empty) {
+          grid.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:5rem 2rem;color:var(--text-muted);">
+              <div style="font-size:56px;margin-bottom:1.5rem;">🔮</div>
+              <div style="font-family:var(--font-head);font-size:22px;margin-bottom:0.75rem;">The vault is being unlocked...</div>
+              <div style="font-size:15px;">First mystery articles will appear here soon. Check back tomorrow!</div>
+            </div>`;
           return;
         }
 
-        // First article = featured
-        const featured = allArticles[0];
-        grid.innerHTML = renderFeatured(featured);
+        const articles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        lastDoc = snap.docs[snap.docs.length - 1];
+        grid.innerHTML = '';
 
-        // Rest as cards
-        allArticles.slice(1).forEach(a => {
-          grid.innerHTML += renderCard(a);
-        });
+        // First = featured
+        grid.innerHTML += renderFeatured(articles[0]);
+
+        // Rest = cards
+        articles.slice(1).forEach(a => { grid.innerHTML += renderCard(a); });
 
         if (snap.docs.length === 7) {
+          document.getElementById('more-section').style.display = 'block';
           document.getElementById('load-more-btn').style.display = 'inline-flex';
         }
-      } catch(e) {
-        console.error(e);
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--text-muted);">Failed to load articles. Please refresh.</div>`;
-      }
+      }, (err) => {
+        console.error(err);
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Failed to load. Please refresh.</div>`;
+      });
     }
 
+    // ── Load more (pagination) ────────────────────────────────
     window.loadMore = async function() {
       if (!lastDoc) return;
       const btn = document.getElementById('load-more-btn');
-      btn.textContent = 'Loading...';
+      btn.textContent = 'Loading...'; btn.disabled = true;
 
-      let q = currentCat === 'all'
+      const q = currentCat === 'all'
         ? query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(6), startAfter(lastDoc))
         : query(collection(db,'articles'), where('category','==',currentCat), orderBy('publishedAt','desc'), limit(6), startAfter(lastDoc));
 
       const snap = await getDocs(q);
       lastDoc = snap.docs[snap.docs.length - 1];
-      const moreGrid = document.getElementById('more-grid');
       snap.docs.forEach(d => {
-        moreGrid.innerHTML += renderCard({ id: d.id, ...d.data() });
+        document.getElementById('more-grid').innerHTML += renderCard({ id: d.id, ...d.data() });
       });
       if (snap.docs.length < 6) btn.style.display = 'none';
-      else btn.textContent = 'Load More Mysteries';
+      else { btn.textContent = 'Load More Mysteries'; btn.disabled = false; }
     };
 
+    // ── Category filter ───────────────────────────────────────
     window.filterCat = function(cat, el) {
+      currentCat = cat;
       document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
       el.classList.add('active');
-      document.getElementById('load-more-btn').style.display = 'none';
-      loadArticles(cat);
+      listenArticles(cat);
     };
 
+    // ── Search ────────────────────────────────────────────────
     window.doSearch = function() {
       const q = document.getElementById('search-input').value.trim();
       if (q) window.location.href = `search.html?q=${encodeURIComponent(q)}`;
     };
 
+    // ── Render helpers ────────────────────────────────────────
     function renderFeatured(a) {
       const img = a.imageUrl
         ? `<img class="featured-card-img" src="${a.imageUrl}" alt="${a.title}" loading="lazy"/>`
-        : `<div class="featured-card-img" style="display:flex;align-items:center;justify-content:center;font-size:72px;">${catEmoji(a.category)}</div>`;
+        : `<div class="featured-card-img" style="display:flex;align-items:center;justify-content:center;font-size:80px;background:var(--bg3);">${catEmoji(a.category)}</div>`;
       return `
         <div class="featured-card" onclick="window.location.href='article.html?id=${a.id}'">
           ${img}
           <div class="featured-card-body">
-            <div class="featured-badge">⚡ Featured Mystery</div>
+            <div class="featured-badge">⚡ Latest Mystery</div>
             <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem;">${a.category||''}</div>
             <div class="featured-card-title">${a.title}</div>
             <div class="featured-card-excerpt">${a.excerpt||''}</div>
-            <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
               <span class="btn-read">Read Full Story →</span>
               <span style="font-size:12px;color:var(--text-faint);">${fmtDate(a.publishedAt)}</span>
             </div>
@@ -241,17 +268,18 @@
     }
 
     function catEmoji(cat) {
-      const map = { 'Cryptids':'🦎','UFOs':'🛸','Ancient Mysteries':'🏛️','Paranormal':'👻','Mythic Creatures':'🐉','Unexplained':'❓' };
-      return map[cat] || '🔮';
+      const m = {'Cryptids':'🦎','UFOs':'🛸','Ancient Mysteries':'🏛️','Paranormal':'👻','Mythic Creatures':'🐉','Unexplained':'❓'};
+      return m[cat] || '🔮';
     }
 
     function fmtDate(ts) {
       if (!ts) return '';
-      const d = ts.toDate ? ts.toDate() : new Date(ts);
-      return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      try { const d = ts.toDate ? ts.toDate() : new Date(ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+      catch(e) { return ''; }
     }
 
-    loadArticles();
+    // ── Start ─────────────────────────────────────────────────
+    listenArticles('all');
   </script>
 </body>
 </html>
