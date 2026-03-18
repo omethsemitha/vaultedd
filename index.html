@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="google-adsense-account" content="ca-pub-7794639822762231"/>
+  <title>Vaultedd — Mysteries, Paranormal & The Unexplained</title>
+  <meta name="description" content="Explore the world's most mysterious creatures, unexplained phenomena, and paranormal events. New articles published daily."/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7794639822762231" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">Vault<span>edd</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="category.html?cat=Cryptids">Cryptids</a>
+      <a href="category.html?cat=UFOs">UFOs</a>
+      <a href="category.html?cat=Ancient Mysteries">Ancient</a>
+      <a href="category.html?cat=Paranormal">Paranormal</a>
+    </div>
+    <div class="nav-search">
+      <input type="text" id="search-input" placeholder="Search mysteries..." onkeydown="if(event.key==='Enter')doSearch()"/>
+    </div>
+  </nav>
+
+  <!-- Top ad -->
+  <div class="ad-wrap" style="background:var(--bg2);border-bottom:1px solid var(--border);padding:0.75rem;">
+    <span class="ad-label">Advertisement</span>
+    <ins class="adsbygoogle ad-slot ad-leaderboard" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">Uncover the Unknown</div>
+    <h1>Where Mysteries Come to Light</h1>
+    <p>Daily articles on cryptids, paranormal events, ancient mysteries and unexplained phenomena — all backed by documented accounts and research.</p>
+    <div class="categories" id="cat-filter">
+      <div class="cat-pill active" onclick="filterCat('all',this)">All</div>
+      <div class="cat-pill" onclick="filterCat('Cryptids',this)">🦎 Cryptids</div>
+      <div class="cat-pill" onclick="filterCat('UFOs',this)">🛸 UFOs</div>
+      <div class="cat-pill" onclick="filterCat('Ancient Mysteries',this)">🏛️ Ancient</div>
+      <div class="cat-pill" onclick="filterCat('Paranormal',this)">👻 Paranormal</div>
+      <div class="cat-pill" onclick="filterCat('Mythic Creatures',this)">🐉 Mythic</div>
+      <div class="cat-pill" onclick="filterCat('Unexplained',this)">❓ Unexplained</div>
+    </div>
+  </section>
+
+  <!-- Featured + articles -->
+  <div class="section">
+    <div class="section-title">Latest Mysteries <span>Updated Daily</span></div>
+    <div class="articles-grid" id="articles-grid">
+      <!-- Skeletons while loading -->
+      <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div style="height:380px;" class="skeleton"></div>
+        <div style="height:380px;" class="skeleton"></div>
+      </div>
+      <div style="height:280px;" class="skeleton"></div>
+      <div style="height:280px;" class="skeleton"></div>
+      <div style="height:280px;" class="skeleton"></div>
+    </div>
+  </div>
+
+  <!-- Mid ad -->
+  <div class="ad-wrap section" style="padding-top:0;">
+    <span class="ad-label">Advertisement</span>
+    <ins class="adsbygoogle ad-slot ad-responsive" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- More articles -->
+  <div class="section" style="padding-top:0;">
+    <div class="section-title">More From The Vault <span id="more-label"></span></div>
+    <div class="articles-grid" id="more-grid"></div>
+    <div style="text-align:center;margin-top:2rem;">
+      <button id="load-more-btn" class="btn-read" onclick="loadMore()" style="display:none;">Load More Mysteries</button>
+    </div>
+  </div>
+
+  <!-- Footer ad -->
+  <div class="ad-wrap" style="padding:1.5rem 2rem;background:var(--bg2);border-top:1px solid var(--border);">
+    <span class="ad-label">Advertisement</span>
+    <ins class="adsbygoogle ad-slot ad-leaderboard" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Vault<span>edd</span></div>
+        <p class="footer-desc">Your daily source for mysteries, paranormal events, cryptids and unexplained phenomena. New articles published every day.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Categories</div>
+        <div class="footer-links">
+          <a href="category.html?cat=Cryptids">Cryptids</a>
+          <a href="category.html?cat=UFOs">UFOs & Aliens</a>
+          <a href="category.html?cat=Ancient Mysteries">Ancient Mysteries</a>
+          <a href="category.html?cat=Paranormal">Paranormal</a>
+          <a href="category.html?cat=Mythic Creatures">Mythic Creatures</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Info</div>
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Use</a>
+          <a href="about.html">About</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 Vaultedd. All rights reserved.</div>
+      <div>Articles generated by AI · For entertainment & research</div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { db } from './js/firebase.js';
+    import { collection, query, orderBy, limit, startAfter, getDocs, where } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    let lastDoc = null;
+    let currentCat = 'all';
+    let allArticles = [];
+
+    async function loadArticles(cat = 'all') {
+      currentCat = cat;
+      lastDoc = null;
+      const grid = document.getElementById('articles-grid');
+      const moreGrid = document.getElementById('more-grid');
+      grid.innerHTML = '';
+      moreGrid.innerHTML = '';
+
+      try {
+        let q = cat === 'all'
+          ? query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(7))
+          : query(collection(db,'articles'), where('category','==',cat), orderBy('publishedAt','desc'), limit(7));
+
+        const snap = await getDocs(q);
+        allArticles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        lastDoc = snap.docs[snap.docs.length - 1];
+
+        if (allArticles.length === 0) {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--text-muted);">
+            <div style="font-size:48px;margin-bottom:1rem;">🔍</div>
+            <div style="font-size:18px;">No articles yet — check back tomorrow!</div>
+          </div>`;
+          return;
+        }
+
+        // First article = featured
+        const featured = allArticles[0];
+        grid.innerHTML = renderFeatured(featured);
+
+        // Rest as cards
+        allArticles.slice(1).forEach(a => {
+          grid.innerHTML += renderCard(a);
+        });
+
+        if (snap.docs.length === 7) {
+          document.getElementById('load-more-btn').style.display = 'inline-flex';
+        }
+      } catch(e) {
+        console.error(e);
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--text-muted);">Failed to load articles. Please refresh.</div>`;
+      }
+    }
+
+    window.loadMore = async function() {
+      if (!lastDoc) return;
+      const btn = document.getElementById('load-more-btn');
+      btn.textContent = 'Loading...';
+
+      let q = currentCat === 'all'
+        ? query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(6), startAfter(lastDoc))
+        : query(collection(db,'articles'), where('category','==',currentCat), orderBy('publishedAt','desc'), limit(6), startAfter(lastDoc));
+
+      const snap = await getDocs(q);
+      lastDoc = snap.docs[snap.docs.length - 1];
+      const moreGrid = document.getElementById('more-grid');
+      snap.docs.forEach(d => {
+        moreGrid.innerHTML += renderCard({ id: d.id, ...d.data() });
+      });
+      if (snap.docs.length < 6) btn.style.display = 'none';
+      else btn.textContent = 'Load More Mysteries';
+    };
+
+    window.filterCat = function(cat, el) {
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('load-more-btn').style.display = 'none';
+      loadArticles(cat);
+    };
+
+    window.doSearch = function() {
+      const q = document.getElementById('search-input').value.trim();
+      if (q) window.location.href = `search.html?q=${encodeURIComponent(q)}`;
+    };
+
+    function renderFeatured(a) {
+      const img = a.imageUrl
+        ? `<img class="featured-card-img" src="${a.imageUrl}" alt="${a.title}" loading="lazy"/>`
+        : `<div class="featured-card-img" style="display:flex;align-items:center;justify-content:center;font-size:72px;">${catEmoji(a.category)}</div>`;
+      return `
+        <div class="featured-card" onclick="window.location.href='article.html?id=${a.id}'">
+          ${img}
+          <div class="featured-card-body">
+            <div class="featured-badge">⚡ Featured Mystery</div>
+            <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem;">${a.category||''}</div>
+            <div class="featured-card-title">${a.title}</div>
+            <div class="featured-card-excerpt">${a.excerpt||''}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span class="btn-read">Read Full Story →</span>
+              <span style="font-size:12px;color:var(--text-faint);">${fmtDate(a.publishedAt)}</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderCard(a) {
+      const img = a.imageUrl
+        ? `<img class="article-card-img" src="${a.imageUrl}" alt="${a.title}" loading="lazy"/>`
+        : `<div class="article-card-img-placeholder">${catEmoji(a.category)}</div>`;
+      return `
+        <div class="article-card" onclick="window.location.href='article.html?id=${a.id}'">
+          ${img}
+          <div class="article-card-body">
+            <div class="article-card-cat">${a.category||'Mystery'}</div>
+            <div class="article-card-title">${a.title}</div>
+            <div class="article-card-excerpt">${a.excerpt||''}</div>
+            <div class="article-card-meta">
+              <span>${fmtDate(a.publishedAt)}</span>
+              <span class="article-card-read">${a.readTime||'5 min read'}</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function catEmoji(cat) {
+      const map = { 'Cryptids':'🦎','UFOs':'🛸','Ancient Mysteries':'🏛️','Paranormal':'👻','Mythic Creatures':'🐉','Unexplained':'❓' };
+      return map[cat] || '🔮';
+    }
+
+    function fmtDate(ts) {
+      if (!ts) return '';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    }
+
+    loadArticles();
+  </script>
+</body>
+</html>
