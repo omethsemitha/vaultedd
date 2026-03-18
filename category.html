@@ -11,6 +11,7 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7794639822762231" crossorigin="anonymous"></script>
 </head>
 <body>
+
   <nav class="navbar">
     <a href="index.html" class="nav-logo">Vault<span>edd</span></a>
     <div class="nav-links">
@@ -21,7 +22,7 @@
       <a href="category.html?cat=Paranormal">Paranormal</a>
     </div>
     <div class="nav-search">
-      <input type="text" placeholder="Search..." onkeydown="if(event.key==='Enter'){const q=this.value.trim();if(q)window.location.href='search.html?q='+encodeURIComponent(q)}"/>
+      <input type="text" placeholder="Search..." onclick="window.location.href='index.html'" readonly/>
     </div>
   </nav>
 
@@ -33,61 +34,114 @@
 
   <div class="section">
     <div class="section-title" id="page-title">Loading...</div>
+
+    <!-- Sub-category pills -->
+    <div class="categories" id="sub-cats" style="margin-bottom:2rem;justify-content:flex-start;"></div>
+
     <div class="articles-grid" id="articles-grid">
       <div style="height:280px;" class="skeleton"></div>
       <div style="height:280px;" class="skeleton"></div>
       <div style="height:280px;" class="skeleton"></div>
     </div>
-    <div style="text-align:center;margin-top:2rem;">
-      <button id="load-more-btn" class="btn-read" onclick="loadMore()" style="display:none;">Load More</button>
+
+    <div id="empty-msg" style="display:none;text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+      <div style="font-size:48px;margin-bottom:1rem;" id="empty-emoji">🔮</div>
+      <div style="font-family:var(--font-head);font-size:20px;margin-bottom:0.5rem;">No articles yet in this category</div>
+      <div style="font-size:14px;">The generator adds new articles daily — check back soon!</div>
     </div>
+  </div>
+
+  <!-- Footer ad -->
+  <div class="ad-wrap" style="padding:1.5rem 2rem;background:var(--bg2);border-top:1px solid var(--border);">
+    <span class="ad-label">Advertisement</span>
+    <ins class="adsbygoogle ad-slot ad-leaderboard" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
   <footer>
     <div class="footer-inner">
-      <div><div class="footer-brand">Vault<span>edd</span></div><p class="footer-desc">Your daily source for mysteries and unexplained phenomena.</p></div>
-      <div><div class="footer-col-title">Categories</div><div class="footer-links"><a href="category.html?cat=Cryptids">Cryptids</a><a href="category.html?cat=UFOs">UFOs</a><a href="category.html?cat=Ancient Mysteries">Ancient</a><a href="category.html?cat=Paranormal">Paranormal</a></div></div>
-      <div><div class="footer-col-title">Info</div><div class="footer-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms</a><a href="about.html">About</a></div></div>
+      <div>
+        <div class="footer-brand">Vault<span>edd</span></div>
+        <p class="footer-desc">Your daily source for mysteries and unexplained phenomena.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Categories</div>
+        <div class="footer-links">
+          <a href="category.html?cat=Cryptids">Cryptids</a>
+          <a href="category.html?cat=UFOs">UFOs</a>
+          <a href="category.html?cat=Ancient Mysteries">Ancient</a>
+          <a href="category.html?cat=Paranormal">Paranormal</a>
+          <a href="category.html?cat=Mythic Creatures">Mythic Creatures</a>
+          <a href="category.html?cat=Unexplained">Unexplained</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Info</div>
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms</a>
+          <a href="about.html">About</a>
+        </div>
+      </div>
     </div>
-    <div class="footer-bottom"><div>© 2025 Vaultedd. All rights reserved.</div><div>AI-generated articles · For entertainment & research</div></div>
+    <div class="footer-bottom">
+      <div>© 2025 Vaultedd. All rights reserved.</div>
+      <div>AI-generated articles · For entertainment & research</div>
+    </div>
   </footer>
 
   <script type="module">
     import { db } from './js/firebase.js';
-    import { collection, query, where, orderBy, limit, startAfter, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { collection, query, orderBy, limit, onSnapshot }
+      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const cat = new URLSearchParams(window.location.search).get('cat') || 'all';
-    let lastDoc = null;
+    const emojis = {'Cryptids':'🦎','UFOs':'🛸','Ancient Mysteries':'🏛️','Paranormal':'👻','Mythic Creatures':'🐉','Unexplained':'❓'};
+    const emoji  = emojis[cat] || '🔮';
+
     document.title = `${cat} — Vaultedd`;
-    document.getElementById('page-title').innerHTML = `${cat} <span>All Articles</span>`;
+    document.getElementById('page-title').innerHTML = `${emoji} ${cat} <span>All Articles</span>`;
+    document.getElementById('empty-emoji').textContent = emoji;
 
-    async function load() {
-      const q = query(collection(db,'articles'), where('category','==',cat), orderBy('publishedAt','desc'), limit(9));
-      const snap = await getDocs(q);
-      lastDoc = snap.docs[snap.docs.length-1];
-      const grid = document.getElementById('articles-grid');
+    // Load all articles, filter client-side
+    const q = query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(200));
+
+    onSnapshot(q, snap => {
+      const all      = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const filtered = cat === 'all' ? all : all.filter(a => a.category === cat);
+      const grid     = document.getElementById('articles-grid');
+      const emptyMsg = document.getElementById('empty-msg');
+
       grid.innerHTML = '';
-      snap.docs.forEach(d => { grid.innerHTML += renderCard({id:d.id,...d.data()}); });
-      if (snap.docs.length===9) document.getElementById('load-more-btn').style.display='inline-flex';
-    }
 
-    window.loadMore = async function() {
-      if (!lastDoc) return;
-      const q = query(collection(db,'articles'), where('category','==',cat), orderBy('publishedAt','desc'), limit(9), startAfter(lastDoc));
-      const snap = await getDocs(q);
-      lastDoc = snap.docs[snap.docs.length-1];
-      snap.docs.forEach(d => { document.getElementById('articles-grid').innerHTML += renderCard({id:d.id,...d.data()}); });
-      if (snap.docs.length<9) document.getElementById('load-more-btn').style.display='none';
-    };
+      if (filtered.length === 0) {
+        emptyMsg.style.display = 'block';
+        return;
+      }
+
+      emptyMsg.style.display = 'none';
+      filtered.forEach(a => { grid.innerHTML += renderCard(a); });
+    });
 
     function renderCard(a) {
-      const emojis = {'Cryptids':'🦎','UFOs':'🛸','Ancient Mysteries':'🏛️','Paranormal':'👻','Mythic Creatures':'🐉','Unexplained':'❓'};
-      const img = a.imageUrl ? `<img class="article-card-img" src="${a.imageUrl}" alt="${a.title}" loading="lazy"/>` : `<div class="article-card-img-placeholder">${emojis[a.category]||'🔮'}</div>`;
+      const img = a.imageUrl
+        ? `<img class="article-card-img" src="${a.imageUrl}" alt="${a.title}" loading="lazy"/>`
+        : `<div class="article-card-img-placeholder">${emojis[a.category]||'🔮'}</div>`;
       const d = a.publishedAt?.toDate ? a.publishedAt.toDate() : new Date();
-      return `<div class="article-card" onclick="window.location.href='article.html?id=${a.id}'">${img}<div class="article-card-body"><div class="article-card-cat">${a.category||''}</div><div class="article-card-title">${a.title}</div><div class="article-card-excerpt">${a.excerpt||''}</div><div class="article-card-meta"><span>${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span><span class="article-card-read">${a.readTime||'5 min read'}</span></div></div></div>`;
+      return `
+        <div class="article-card" onclick="window.location.href='article.html?id=${a.id}'">
+          ${img}
+          <div class="article-card-body">
+            <div class="article-card-cat">${a.category||''}</div>
+            <div class="article-card-title">${a.title}</div>
+            <div class="article-card-excerpt">${a.excerpt||''}</div>
+            <div class="article-card-meta">
+              <span>${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+              <span class="article-card-read">${a.readTime||'5 min read'}</span>
+            </div>
+          </div>
+        </div>`;
     }
-
-    load();
   </script>
 </body>
 </html>

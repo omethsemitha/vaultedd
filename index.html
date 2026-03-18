@@ -10,6 +10,26 @@
   <meta name="description" content="Explore the world's most mysterious creatures, unexplained phenomena, and paranormal events. New articles published daily."/>
   <link rel="stylesheet" href="css/main.css"/>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7794639822762231" crossorigin="anonymous"></script>
+  <style>
+    @keyframes livepulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.8);} }
+
+    /* Search overlay */
+    .search-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(6px); z-index:999; align-items:flex-start; justify-content:center; padding-top:10vh; }
+    .search-overlay.open { display:flex; }
+    .search-box { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-lg); width:100%; max-width:640px; overflow:hidden; }
+    .search-input-wrap { display:flex; align-items:center; padding:1rem 1.25rem; border-bottom:1px solid var(--border); gap:10px; }
+    .search-input-wrap input { flex:1; background:none; border:none; outline:none; font-size:18px; color:var(--text); font-family:var(--font-body); }
+    .search-input-wrap input::placeholder { color:var(--text-faint); }
+    .search-close { background:none; border:1px solid var(--border); color:var(--text-muted); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:13px; font-family:var(--font-body); }
+    .search-results { max-height:60vh; overflow-y:auto; }
+    .search-result-item { display:flex; align-items:center; gap:12px; padding:12px 1.25rem; cursor:pointer; border-bottom:1px solid var(--border); transition:var(--transition); }
+    .search-result-item:hover { background:var(--bg3); }
+    .search-result-img { width:56px; height:56px; border-radius:8px; object-fit:cover; background:var(--bg3); flex-shrink:0; }
+    .search-result-title { font-size:14px; font-weight:600; margin-bottom:3px; }
+    .search-result-cat { font-size:12px; color:var(--accent); }
+    .search-empty { padding:2rem; text-align:center; color:var(--text-muted); font-size:14px; }
+    .search-icon { font-size:18px; color:var(--text-faint); }
+  </style>
 </head>
 <body>
 
@@ -23,11 +43,25 @@
       <a href="category.html?cat=Paranormal">Paranormal</a>
     </div>
     <div class="nav-search">
-      <input type="text" id="search-input" placeholder="Search mysteries..." onkeydown="if(event.key==='Enter')doSearch()"/>
+      <input type="text" id="search-input" placeholder="Search mysteries..." onclick="openSearch()" readonly/>
     </div>
   </nav>
 
-  <!-- Top leaderboard ad -->
+  <!-- Search overlay -->
+  <div class="search-overlay" id="search-overlay" onclick="closeSearchIfOutside(event)">
+    <div class="search-box">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-real-input" placeholder="Search mysteries, cryptids, UFOs..." oninput="doSearch(this.value)" autofocus/>
+        <button class="search-close" onclick="closeSearch()">✕ Close</button>
+      </div>
+      <div class="search-results" id="search-results">
+        <div class="search-empty">Start typing to search all mysteries...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top ad -->
   <div class="ad-wrap" style="background:var(--bg2);border-bottom:1px solid var(--border);padding:0.75rem;">
     <span class="ad-label">Advertisement</span>
     <ins class="adsbygoogle ad-slot ad-leaderboard" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -53,7 +87,7 @@
   <!-- Latest articles -->
   <div class="section">
     <div class="section-title">
-      Latest Mysteries
+      <span id="section-title-text">Latest Mysteries</span>
       <span id="live-indicator" style="display:flex;align-items:center;gap:5px;font-size:12px;color:#10b981;">
         <span style="width:7px;height:7px;border-radius:50%;background:#10b981;animation:livepulse 2s infinite;display:inline-block;"></span>
         Live
@@ -109,6 +143,7 @@
           <a href="category.html?cat=Ancient Mysteries">Ancient Mysteries</a>
           <a href="category.html?cat=Paranormal">Paranormal</a>
           <a href="category.html?cat=Mythic Creatures">Mythic Creatures</a>
+          <a href="category.html?cat=Unexplained">Unexplained</a>
         </div>
       </div>
       <div>
@@ -126,107 +161,139 @@
     </div>
   </footer>
 
-  <style>
-    @keyframes livepulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.8);} }
-  </style>
-
   <script type="module">
     import { db } from './js/firebase.js';
-    import { collection, query, orderBy, limit, where,
+    import { collection, query, orderBy, limit,
              onSnapshot, getDocs, startAfter } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-    let currentCat = 'all';
-    let lastDoc    = null;
+    let currentCat  = 'all';
+    let lastDoc     = null;
     let unsubscribe = null;
+    let allArticles = []; // loaded once, filtered client-side
 
-    // ── Realtime listener — auto updates when new article published ──
-    function listenArticles(cat) {
-      if (unsubscribe) unsubscribe(); // stop previous listener
+    // ── Load ALL articles once into memory ───────────────────
+    // This avoids needing Firestore composite indexes for category filter
+    async function loadAllArticles() {
+      const q = query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(100));
 
-      const grid = document.getElementById('articles-grid');
+      unsubscribe = onSnapshot(q, (snap) => {
+        allArticles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderFiltered();
+      }, err => {
+        console.error(err);
+        document.getElementById('articles-grid').innerHTML =
+          `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
+            Failed to load articles. Please refresh.
+          </div>`;
+      });
+    }
+
+    // ── Filter client-side — no Firestore index needed ───────
+    function renderFiltered() {
+      const filtered = currentCat === 'all'
+        ? allArticles
+        : allArticles.filter(a => a.category === currentCat);
+
+      const grid     = document.getElementById('articles-grid');
       const moreGrid = document.getElementById('more-grid');
-      grid.innerHTML = '';
+      const titleEl  = document.getElementById('section-title-text');
+
+      grid.innerHTML     = '';
       moreGrid.innerHTML = '';
       document.getElementById('more-section').style.display = 'none';
       document.getElementById('load-more-btn').style.display = 'none';
 
-      // Show skeletons while loading
-      grid.innerHTML = `
-        <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
-          <div style="height:380px;" class="skeleton"></div>
-          <div style="height:380px;" class="skeleton"></div>
-        </div>
-        <div style="height:280px;" class="skeleton"></div>
-        <div style="height:280px;" class="skeleton"></div>
-        <div style="height:280px;" class="skeleton"></div>`;
+      titleEl.textContent = currentCat === 'all'
+        ? 'Latest Mysteries'
+        : `${catEmoji(currentCat)} ${currentCat}`;
 
-      const q = cat === 'all'
-        ? query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(7))
-        : query(collection(db,'articles'), where('category','==',cat), orderBy('publishedAt','desc'), limit(7));
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:5rem 2rem;color:var(--text-muted);">
+            <div style="font-size:56px;margin-bottom:1.5rem;">${catEmoji(currentCat)}</div>
+            <div style="font-family:var(--font-head);font-size:22px;margin-bottom:0.75rem;">
+              No ${currentCat} articles yet
+            </div>
+            <div style="font-size:15px;">Check back tomorrow — the generator runs daily!</div>
+          </div>`;
+        return;
+      }
 
-      // onSnapshot = auto updates in real time when Firestore changes
-      unsubscribe = onSnapshot(q, (snap) => {
-        if (snap.empty) {
-          grid.innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:5rem 2rem;color:var(--text-muted);">
-              <div style="font-size:56px;margin-bottom:1.5rem;">🔮</div>
-              <div style="font-family:var(--font-head);font-size:22px;margin-bottom:0.75rem;">The vault is being unlocked...</div>
-              <div style="font-size:15px;">First mystery articles will appear here soon. Check back tomorrow!</div>
-            </div>`;
-          return;
-        }
+      // First 7 in main grid
+      const first7 = filtered.slice(0, 7);
+      const rest   = filtered.slice(7);
 
-        const articles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        lastDoc = snap.docs[snap.docs.length - 1];
-        grid.innerHTML = '';
+      // First = featured
+      grid.innerHTML += renderFeatured(first7[0]);
+      first7.slice(1).forEach(a => { grid.innerHTML += renderCard(a); });
 
-        // First = featured
-        grid.innerHTML += renderFeatured(articles[0]);
-
-        // Rest = cards
-        articles.slice(1).forEach(a => { grid.innerHTML += renderCard(a); });
-
-        if (snap.docs.length === 7) {
-          document.getElementById('more-section').style.display = 'block';
-          document.getElementById('load-more-btn').style.display = 'inline-flex';
-        }
-      }, (err) => {
-        console.error(err);
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Failed to load. Please refresh.</div>`;
-      });
+      // Rest = more grid
+      if (rest.length > 0) {
+        document.getElementById('more-section').style.display = 'block';
+        rest.forEach(a => { moreGrid.innerHTML += renderCard(a); });
+      }
     }
-
-    // ── Load more (pagination) ────────────────────────────────
-    window.loadMore = async function() {
-      if (!lastDoc) return;
-      const btn = document.getElementById('load-more-btn');
-      btn.textContent = 'Loading...'; btn.disabled = true;
-
-      const q = currentCat === 'all'
-        ? query(collection(db,'articles'), orderBy('publishedAt','desc'), limit(6), startAfter(lastDoc))
-        : query(collection(db,'articles'), where('category','==',currentCat), orderBy('publishedAt','desc'), limit(6), startAfter(lastDoc));
-
-      const snap = await getDocs(q);
-      lastDoc = snap.docs[snap.docs.length - 1];
-      snap.docs.forEach(d => {
-        document.getElementById('more-grid').innerHTML += renderCard({ id: d.id, ...d.data() });
-      });
-      if (snap.docs.length < 6) btn.style.display = 'none';
-      else { btn.textContent = 'Load More Mysteries'; btn.disabled = false; }
-    };
 
     // ── Category filter ───────────────────────────────────────
     window.filterCat = function(cat, el) {
       currentCat = cat;
       document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
       el.classList.add('active');
-      listenArticles(cat);
+      renderFiltered();
     };
 
     // ── Search ────────────────────────────────────────────────
-    window.doSearch = function() {
-      const q = document.getElementById('search-input').value.trim();
-      if (q) window.location.href = `search.html?q=${encodeURIComponent(q)}`;
+    window.openSearch = function() {
+      document.getElementById('search-overlay').classList.add('open');
+      setTimeout(() => document.getElementById('search-real-input').focus(), 100);
+    };
+
+    window.closeSearch = function() {
+      document.getElementById('search-overlay').classList.remove('open');
+      document.getElementById('search-real-input').value = '';
+      document.getElementById('search-results').innerHTML =
+        '<div class="search-empty">Start typing to search all mysteries...</div>';
+    };
+
+    window.closeSearchIfOutside = function(e) {
+      if (e.target === document.getElementById('search-overlay')) closeSearch();
+    };
+
+    window.doSearch = function(q) {
+      const results = document.getElementById('search-results');
+      if (!q.trim()) {
+        results.innerHTML = '<div class="search-empty">Start typing to search all mysteries...</div>';
+        return;
+      }
+      const term    = q.toLowerCase();
+      const matched = allArticles.filter(a =>
+        a.title?.toLowerCase().includes(term) ||
+        a.excerpt?.toLowerCase().includes(term) ||
+        a.category?.toLowerCase().includes(term) ||
+        a.tags?.some(t => t.toLowerCase().includes(term))
+      );
+      if (matched.length === 0) {
+        results.innerHTML = `<div class="search-empty">No results for "<strong>${q}</strong>"</div>`;
+        return;
+      }
+      results.innerHTML = matched.slice(0, 8).map(a => `
+        <div class="search-result-item" onclick="window.location.href='article.html?id=${a.id}'">
+          ${a.imageUrl
+            ? `<img class="search-result-img" src="${a.imageUrl}" alt="${a.title}"/>`
+            : `<div class="search-result-img" style="display:flex;align-items:center;justify-content:center;font-size:24px;">${catEmoji(a.category)}</div>`}
+          <div>
+            <div class="search-result-title">${a.title}</div>
+            <div class="search-result-cat">${a.category || 'Mystery'}</div>
+          </div>
+        </div>`).join('');
+    };
+
+    // Close search on Escape key
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
+
+    // ── Load more ─────────────────────────────────────────────
+    window.loadMore = function() {
+      // Already rendered in more-grid — just show button or not
     };
 
     // ── Render helpers ────────────────────────────────────────
@@ -276,12 +343,14 @@
 
     function fmtDate(ts) {
       if (!ts) return '';
-      try { const d = ts.toDate ? ts.toDate() : new Date(ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
-      catch(e) { return ''; }
+      try {
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      } catch(e) { return ''; }
     }
 
     // ── Start ─────────────────────────────────────────────────
-    listenArticles('all');
+    loadAllArticles();
   </script>
 </body>
 </html>
