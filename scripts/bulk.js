@@ -16,14 +16,7 @@ const UNSPLASH_KEY = process.env.UNSPLASH_ACCESS_KEY;
 // How many articles to generate in one run
 const BULK_COUNT = parseInt(process.env.BULK_COUNT || '20');
 
-const TOPICS = [
-  { category: 'Cryptids',          topics: ['Bigfoot','Loch Ness Monster','Chupacabra','Mothman','Jersey Devil','Thunderbird','Dogman','Black Eyed Children','The Dover Demon','Yeti','Skunk Ape','The Flatwoods Monster','Lizard Man','The Beast of Busco','Ogopogo'] },
-  { category: 'UFOs',              topics: ['Roswell incident','Phoenix Lights','Belgian UFO wave','Rendlesham Forest incident','Travis Walton abduction','Bob Lazar Area 51','The Tic Tac UFO','Nimitz encounter','Skinwalker Ranch','Battle of Los Angeles 1942','The Kecksburg UFO','Tehran UFO incident','Shag Harbour incident','Lubbock Lights','The Westall UFO'] },
-  { category: 'Ancient Mysteries', topics: ['The Nazca Lines','Stonehenge secrets','Lost city of Atlantis','The Antikythera Mechanism','Easter Island mysteries','Gobekli Tepe','The Voynich Manuscript','Egyptian pyramid secrets','The Baghdad Battery','Puma Punku','The Sacsayhuaman walls','Derinkuyu underground city','The Longyou Caves','Yonaguni Monument','The Plain of Jars'] },
-  { category: 'Paranormal',        topics: ['The Amityville Horror','Shadow people','The Hat Man phenomenon','The Dyatlov Pass incident','The Bridgewater Triangle','The Sallie House haunting','Poltergeist phenomena','Near death experiences','Electronic Voice Phenomena','The Bell Witch haunting','The Enfield Poltergeist','The Haunting of Borley Rectory','The Myrtles Plantation','The Black Monk of Pontefract','The Stone Tape theory'] },
-  { category: 'Mythic Creatures',  topics: ['Dragon mythology origins','The Kraken','Werewolf legends history','Vampire folklore origins','Kelpie water spirits','The Banshee','Wendigo legend','Medusa mythology','The Minotaur','Basilisk legend','The Djinn','Kitsune fox spirits','The Selkie','Baba Yaga','The Strigoi'] },
-  { category: 'Unexplained',       topics: ['The Bermuda Triangle','The Philadelphia Experiment','The Taos Hum','The Wow signal','Oak Island mystery','The Tunguska event','The Mary Celeste','Green Children of Woolpit','The Hessdalen Lights','The Marfa Lights','The Betz Mystery Sphere','The Georgia Guidestones','The Oakville Blobs','The Hum phenomenon','The Dybbuk Box'] },
-];
+import { TOPICS } from './topics.js';
 
 async function pickTopics(count) {
   const usedSnap = await db.collection('used_topics').orderBy('usedAt','desc').limit(100).get();
