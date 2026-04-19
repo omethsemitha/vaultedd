@@ -1,3 +1,7 @@
+// scripts/generate.js
+// Runs daily via GitHub Actions
+// Generates one high-quality 1500+ word mystery article
+
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import Groq from 'groq-sdk';
@@ -12,74 +16,84 @@ const UNSPLASH_KEY = process.env.UNSPLASH_ACCESS_KEY;
 
 // ── Topics ────────────────────────────────────────────────────
 const TOPICS = [
-  { category: 'Cryptids',          topics: ['Bigfoot','Loch Ness Monster','Chupacabra','Mothman','Jersey Devil','Thunderbird','Dogman','Black Eyed Children','The Dover Demon','Yeti'] },
-  { category: 'UFOs',              topics: ['Roswell incident','Phoenix Lights','Belgian UFO wave','Rendlesham Forest incident','Travis Walton abduction','Bob Lazar Area 51','The Tic Tac UFO','Nimitz encounter','Skinwalker Ranch','Battle of Los Angeles 1942'] },
-  { category: 'Ancient Mysteries', topics: ['The Nazca Lines','Stonehenge secrets','Lost city of Atlantis','The Antikythera Mechanism','Easter Island mysteries','Gobekli Tepe','The Voynich Manuscript','Egyptian pyramid secrets','The Baghdad Battery','Puma Punku'] },
-  { category: 'Paranormal',        topics: ['The Amityville Horror','Shadow people','The Hat Man phenomenon','The Dyatlov Pass incident','The Bridgewater Triangle','The Sallie House haunting','Poltergeist phenomena','Near death experiences','Electronic Voice Phenomena','The Stone Tape theory'] },
-  { category: 'Mythic Creatures',  topics: ['Dragon mythology origins','The Kraken','Werewolf legends history','Vampire folklore origins','Kelpie water spirits','The Banshee','Wendigo legend','Medusa mythology','The Minotaur','Basilisk legend'] },
-  { category: 'Unexplained',       topics: ['The Bermuda Triangle','The Philadelphia Experiment','The Taos Hum','The Wow signal','Oak Island mystery','The Tungunga event','The Mary Celeste','Green Children of Woolpit','The Hum phenomenon','The Dybbuk Box'] },
+  { category: 'Cryptids',          topics: ['Bigfoot','Loch Ness Monster','Chupacabra','Mothman','Jersey Devil','Thunderbird','Dogman','Black Eyed Children','The Dover Demon','Yeti','Skunk Ape','The Flatwoods Monster','Lizard Man of Scape Ore Swamp','The Beast of Busco','Ogopogo'] },
+  { category: 'UFOs',              topics: ['Roswell incident','Phoenix Lights','Belgian UFO wave','Rendlesham Forest incident','Travis Walton abduction','Bob Lazar Area 51','The Tic Tac UFO','Nimitz encounter','Skinwalker Ranch','Battle of Los Angeles 1942','The Kecksburg UFO','Tehran UFO incident','Shag Harbour incident','Lubbock Lights','The Westall UFO'] },
+  { category: 'Ancient Mysteries', topics: ['The Nazca Lines','Stonehenge secrets','Lost city of Atlantis','The Antikythera Mechanism','Easter Island mysteries','Gobekli Tepe','The Voynich Manuscript','Egyptian pyramid secrets','The Baghdad Battery','Puma Punku','The Sacsayhuaman walls','Derinkuyu underground city','The Longyou Caves','Yonaguni Monument','The Plain of Jars'] },
+  { category: 'Paranormal',        topics: ['The Amityville Horror','Shadow people','The Hat Man phenomenon','The Dyatlov Pass incident','The Bridgewater Triangle','The Sallie House haunting','Poltergeist phenomena','Near death experiences','Electronic Voice Phenomena','The Stone Tape theory','The Black Monk of Pontefract','The Bell Witch haunting','The Enfield Poltergeist','The Haunting of Borley Rectory','The Myrtles Plantation'] },
+  { category: 'Mythic Creatures',  topics: ['Dragon mythology origins','The Kraken','Werewolf legends history','Vampire folklore origins','Kelpie water spirits','The Banshee','Wendigo legend','Medusa mythology','The Minotaur','Basilisk legend','The Djinn','Kitsune fox spirits','The Selkie','Baba Yaga','The Strigoi'] },
+  { category: 'Unexplained',       topics: ['The Bermuda Triangle','The Philadelphia Experiment','The Taos Hum','The Wow signal','Oak Island mystery','The Tunguska event','The Mary Celeste','Green Children of Woolpit','The Hum phenomenon','The Dybbuk Box','The Oakville Blobs','The Hessdalen Lights','The Marfa Lights','The Betz Mystery Sphere','The Georgia Guidestones'] },
 ];
 
 async function pickTopic() {
-  const usedSnap = await db.collection('used_topics').orderBy('usedAt','desc').limit(50).get();
+  const usedSnap = await db.collection('used_topics').orderBy('usedAt','desc').limit(60).get();
   const used = usedSnap.docs.map(d => d.data().topic);
   for (const group of TOPICS) {
     for (const topic of group.topics) {
       if (!used.includes(topic)) return { topic, category: group.category };
     }
   }
+  // All used — start from beginning
   return { topic: TOPICS[0].topics[0], category: TOPICS[0].category };
 }
 
 async function generateArticle(topic, category) {
   console.log(`Generating article: ${topic} (${category})`);
 
-  const prompt = `You are a journalist for Vaultedd, a mystery and paranormal website.
-Write a detailed article about: "${topic}" in the category "${category}".
+  const prompt = `You are a senior investigative journalist for Vaultedd, a premium mystery and paranormal website.
+Write a comprehensive, deeply researched article about: "${topic}" in the category "${category}".
 
-IMPORTANT: Respond with ONLY a valid JSON object. No markdown, no code blocks, no extra text.
-All string values must be on single lines - no literal newlines inside strings.
-Use \\n for line breaks within HTML content.
+CRITICAL: Respond with ONLY a valid JSON object. No markdown, no code blocks, no extra text before or after.
+All string values must NOT contain literal newlines. Use the text \\n only where needed inside HTML.
 
-Required JSON format:
-{"title":"compelling article title here","excerpt":"2-3 sentence teaser here","content":"<h2>Section One</h2><p>Paragraph one text here.</p><h2>Section Two</h2><p>Paragraph two text here.</p>","tags":["tag1","tag2","tag3","tag4","tag5"],"readTime":"6 min read","searchQuery":"atmospheric dark forest mist"}
+Required JSON format (copy this structure exactly):
+{"title":"Your Title Here","excerpt":"Your 2-3 sentence excerpt here.","content":"Your full HTML content here with h2 and p tags.","tags":["tag1","tag2","tag3","tag4","tag5"],"readTime":"9 min read","searchQuery":"dark forest atmospheric mystery"}
 
-Rules:
-- title: engaging clickbait-style but factual
-- excerpt: 2-3 sentences, no quotes inside
-- content: valid HTML with h2 and p tags, minimum 500 words, NO newlines inside the JSON string
-- tags: 5 relevant lowercase tags
-- searchQuery: 2-4 words for Unsplash image search (nature/atmospheric/dark)`;
+CONTENT REQUIREMENTS:
+- Minimum 1500 words in the content field
+- Must have at least 6 H2 subheadings
+- Include documented historical accounts and real eyewitness reports
+- Include a "Historical Background" section
+- Include a "Key Evidence" section  
+- Include a "Expert Opinions" section
+- Include a "Most Notable Cases" or "Most Notable Accounts" section
+- Include a "Theories and Explanations" section
+- Include a "Why It Still Matters Today" section
+- End with a thought-provoking conclusion paragraph
+- Be factual about what is documented, clearly note what is speculation
+- Do NOT make up specific names unless historically documented
+- Write in an engaging, journalistic but mysterious tone
+- Each paragraph should be 3-5 sentences minimum
+
+EXCERPT: Write 2-3 compelling sentences that make people want to read more.
+TAGS: 5 relevant lowercase tags
+SEARCH QUERY: 2-4 atmospheric words for an Unsplash image (nature/dark/mysterious)
+READ TIME: Calculate based on 1500+ words (should be "8 min read" or more)`;
 
   const completion = await groq.chat.completions.create({
     messages: [{ role: 'user', content: prompt }],
     model: 'llama-3.3-70b-versatile',
     temperature: 0.7,
-    max_tokens: 2500,
+    max_tokens: 4000,
   });
 
   const raw = completion.choices[0].message.content.trim();
-  console.log('Raw response preview:', raw.substring(0, 200));
+  console.log('Response length:', raw.length, 'chars');
 
   // Clean the response
   let cleaned = raw;
-
-  // Remove markdown code blocks if present
   cleaned = cleaned.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
 
-  // Extract JSON object
   const firstBrace = cleaned.indexOf('{');
   const lastBrace  = cleaned.lastIndexOf('}');
-  if (firstBrace === -1 || lastBrace === -1) throw new Error('No JSON object found in response');
+  if (firstBrace === -1 || lastBrace === -1) throw new Error('No JSON object found');
   cleaned = cleaned.substring(firstBrace, lastBrace + 1);
 
-  // Fix control characters inside JSON strings
-  // Replace literal newlines/tabs/carriage returns inside strings
+  // Fix control characters
   cleaned = cleaned.replace(/[\x00-\x09\x0b\x0c\x0e-\x1f]/g, ' ');
 
-  // Fix literal newlines inside string values (between quotes)
+  // Fix literal newlines inside JSON strings
   cleaned = cleaned.replace(/("(?:[^"\\]|\\.)*")/g, (match) => {
-    return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+    return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, ' ');
   });
 
   let parsed;
@@ -87,14 +101,18 @@ Rules:
     parsed = JSON.parse(cleaned);
   } catch(e) {
     console.error('JSON parse failed:', e.message);
-    console.error('Cleaned JSON preview:', cleaned.substring(0, 500));
+    console.error('Cleaned preview:', cleaned.substring(0, 300));
     throw new Error(`JSON parse error: ${e.message}`);
   }
 
-  // Convert \\n back to actual newlines in content
+  // Convert \\n back in content
   if (parsed.content) {
     parsed.content = parsed.content.replace(/\\n/g, '\n');
   }
+
+  // Log word count
+  const wordCount = parsed.content?.replace(/<[^>]*>/g, '').split(/\s+/).length || 0;
+  console.log(`Word count: ~${wordCount} words`);
 
   return parsed;
 }
@@ -127,7 +145,7 @@ async function saveArticle(article, imageData, topic, category) {
     content:        article.content,
     category,
     tags:           article.tags || [],
-    readTime:       article.readTime || '6 min read',
+    readTime:       article.readTime || '9 min read',
     publishedAt:    Timestamp.now(),
     imageUrl:       imageData?.imageUrl || null,
     imageThumb:     imageData?.imageThumb || null,
@@ -137,7 +155,7 @@ async function saveArticle(article, imageData, topic, category) {
     generatedBy:    'groq/llama-3.3-70b-versatile',
   });
   await db.collection('used_topics').add({ topic, usedAt: Timestamp.now() });
-  console.log(`✅ Article saved: "${article.title}" (ID: ${docRef.id})`);
+  console.log(`✅ Saved: "${article.title}" (ID: ${docRef.id})`);
 }
 
 async function main() {

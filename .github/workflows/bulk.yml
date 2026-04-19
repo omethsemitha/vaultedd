@@ -1,13 +1,17 @@
-name: Daily Article Generator
+name: Bulk Generate Articles
 
 on:
-  schedule:
-    - cron: '0 8 * * *'
   workflow_dispatch:
+    inputs:
+      count:
+        description: 'Number of articles to generate (max 20)'
+        required: true
+        default: '20'
 
 jobs:
-  generate:
+  bulk:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
@@ -16,9 +20,10 @@ jobs:
         with:
           node-version: '20'
       - run: npm install --no-package-lock
-      - name: Generate daily article
+      - name: Bulk generate articles
         env:
           GROQ_API_KEY:             ${{ secrets.GROQ_API_KEY }}
           UNSPLASH_ACCESS_KEY:      ${{ secrets.UNSPLASH_ACCESS_KEY }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: node scripts/generate.js
+          BULK_COUNT:               ${{ github.event.inputs.count }}
+        run: node scripts/bulk.js
