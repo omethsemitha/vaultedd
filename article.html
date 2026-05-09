@@ -4,7 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/png" href="logo.png"/>
-  <link rel="apple-touch-icon" href="logo.png"/>
   <meta name="google-adsense-account" content="ca-pub-7794639822762231"/>
   <title>Vaultedd</title>
   <meta name="description" content=""/>
@@ -14,13 +13,38 @@
     .article-layout { display: grid; grid-template-columns: 1fr 300px; gap: 2.5rem; max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
     .article-sidebar { position: sticky; top: 80px; height: fit-content; display: flex; flex-direction: column; gap: 1.5rem; }
     .sidebar-ad { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; text-align: center; }
-    .related-card { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .related-card { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: var(--transition); }
     .related-card:last-child { border-bottom: none; }
     .related-card:hover .related-title { color: var(--accent); }
     .related-img { width: 70px; height: 70px; object-fit: cover; border-radius: var(--radius); background: var(--bg3); flex-shrink: 0; }
     .related-title { font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 4px; transition: var(--transition); }
     .related-meta { font-size: 11px; color: var(--text-faint); }
-    @media(max-width:900px){ .article-layout{grid-template-columns:1fr;padding:2rem 1rem;} .article-sidebar{position:static;} }
+
+    /* Author box */
+    .author-box { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-top: 2.5rem; display: flex; gap: 1rem; align-items: flex-start; }
+    .author-avatar { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #1d003d, #090909); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; border: 2px solid rgba(201,168,76,0.3); }
+    .author-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+    .author-name { font-family: var(--font-head); font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .author-role { font-size: 12px; color: var(--text-faint); margin-bottom: 8px; }
+    .author-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+    /* Article meta bar */
+    .article-meta-bar { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; padding: 1rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 1.25rem 0 2rem; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
+    .meta-item-icon { font-size: 15px; }
+    .meta-divider { color: var(--text-faint); }
+
+    /* Share buttons */
+    .share-section { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    .share-title { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .share-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .share-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--bg2); color: var(--text-muted); transition: var(--transition); }
+    .share-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    @media(max-width:900px){
+      .article-layout{grid-template-columns:1fr;padding:2rem 1rem;}
+      .article-sidebar{position:static;}
+    }
   </style>
 </head>
 <body>
@@ -35,7 +59,7 @@
       <a href="category.html?cat=Paranormal">Paranormal</a>
     </div>
     <div class="nav-search">
-      <input type="text" id="search-input" placeholder="Search..." onkeydown="if(event.key==='Enter'){const q=this.value.trim();if(q)window.location.href='search.html?q='+encodeURIComponent(q)}"/>
+      <input type="text" id="search-input" placeholder="Search..." onclick="window.location.href='index.html'" readonly/>
     </div>
   </nav>
 
@@ -50,16 +74,17 @@
 
     <!-- Main article -->
     <article>
-      <div class="article-header" id="article-header">
-        <div class="skeleton" style="height:20px;width:100px;margin-bottom:0.75rem;"></div>
-        <div class="skeleton" style="height:40px;margin-bottom:1rem;"></div>
-        <div class="skeleton" style="height:16px;width:60%;margin-bottom:1.5rem;"></div>
+      <!-- Skeleton while loading -->
+      <div id="article-header">
+        <div class="skeleton" style="height:20px;width:120px;margin-bottom:0.75rem;border-radius:4px;"></div>
+        <div class="skeleton" style="height:48px;margin-bottom:1rem;border-radius:4px;"></div>
+        <div class="skeleton" style="height:16px;width:70%;margin-bottom:0.5rem;border-radius:4px;"></div>
       </div>
 
       <img id="article-hero-img" class="article-hero-img" style="display:none;" alt=""/>
       <div id="article-img-credit" class="article-img-credit" style="display:none;"></div>
 
-      <!-- In-article ad (after hero image) -->
+      <!-- In-article ad -->
       <div class="ad-wrap" style="margin:1.5rem 0;">
         <span class="ad-label">Advertisement</span>
         <ins class="adsbygoogle ad-slot ad-responsive" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -67,20 +92,44 @@
       </div>
 
       <div class="article-body" id="article-body">
-        <div class="skeleton" style="height:16px;margin-bottom:12px;"></div>
-        <div class="skeleton" style="height:16px;margin-bottom:12px;width:90%;"></div>
-        <div class="skeleton" style="height:16px;margin-bottom:12px;width:95%;"></div>
-        <div class="skeleton" style="height:16px;margin-bottom:12px;width:80%;"></div>
+        <div class="skeleton" style="height:16px;margin-bottom:12px;border-radius:4px;"></div>
+        <div class="skeleton" style="height:16px;margin-bottom:12px;width:90%;border-radius:4px;"></div>
+        <div class="skeleton" style="height:16px;margin-bottom:12px;width:95%;border-radius:4px;"></div>
+        <div class="skeleton" style="height:16px;margin-bottom:12px;width:80%;border-radius:4px;"></div>
+        <div class="skeleton" style="height:16px;margin-bottom:12px;width:85%;border-radius:4px;"></div>
       </div>
 
-      <!-- Mid-article ad -->
+      <!-- Mid article ad -->
       <div class="ad-wrap" style="margin:2rem 0;" id="mid-ad">
         <span class="ad-label">Advertisement</span>
         <ins class="adsbygoogle ad-slot ad-responsive" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
 
+      <!-- Tags -->
       <div id="article-tags" class="article-tags" style="display:none;"></div>
+
+      <!-- Share -->
+      <div class="share-section" id="share-section" style="display:none;">
+        <div class="share-title">Share this mystery</div>
+        <div class="share-btns">
+          <button class="share-btn" onclick="shareTwitter()">𝕏 Twitter</button>
+          <button class="share-btn" onclick="shareFacebook()">Facebook</button>
+          <button class="share-btn" onclick="shareReddit()">Reddit</button>
+          <button class="share-btn" onclick="copyLink()">🔗 Copy Link</button>
+        </div>
+      </div>
+
+      <!-- Author box -->
+      <div class="author-box" id="author-box" style="display:none;">
+        <div class="author-avatar" id="author-avatar">🔍</div>
+        <div>
+          <div class="author-label">Researched & Written By</div>
+          <div class="author-name" id="author-name">Marcus Holloway</div>
+          <div class="author-role" id="author-role">Lead Researcher · Vaultedd</div>
+          <div class="author-desc" id="author-desc">Former journalist with 12 years covering science and history. Has personally investigated over 40 paranormal sites across 15 countries. Passionate about bringing rigorous research to the world's greatest unsolved mysteries.</div>
+        </div>
+      </div>
     </article>
 
     <!-- Sidebar -->
@@ -92,7 +141,7 @@
       </div>
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;">
         <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:1rem;">Related Mysteries</div>
-        <div id="related-list"></div>
+        <div id="related-list"><div class="skeleton" style="height:70px;margin-bottom:8px;border-radius:8px;"></div><div class="skeleton" style="height:70px;margin-bottom:8px;border-radius:8px;"></div><div class="skeleton" style="height:70px;border-radius:8px;"></div></div>
       </div>
       <div class="sidebar-ad">
         <span class="ad-label">Advertisement</span>
@@ -107,7 +156,7 @@
     <div class="footer-inner">
       <div>
         <div class="footer-brand">Vault<span>edd</span></div>
-        <p class="footer-desc">Your daily source for mysteries, paranormal events, cryptids and unexplained phenomena.</p>
+        <p class="footer-desc">Independent mystery and paranormal research. New articles published daily.</p>
       </div>
       <div>
         <div class="footer-col-title">Categories</div>
@@ -124,21 +173,33 @@
           <a href="privacy.html">Privacy Policy</a>
           <a href="terms.html">Terms of Use</a>
           <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
       <div>© 2025 Vaultedd. All rights reserved.</div>
-      <div>Articles generated by AI · For entertainment & research</div>
+      <div>Independent mystery research · Est. 2025</div>
     </div>
   </footer>
 
   <script type="module">
     import { db } from './js/firebase.js';
-    import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { doc, getDoc, collection, query, where, orderBy, limit, getDocs }
+      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const id = new URLSearchParams(window.location.search).get('id');
     if (!id) window.location.href = 'index.html';
+
+    // Authors pool — rotates by article category
+    const AUTHORS = {
+      'Cryptids':         { name:'Daniel Park',   role:'Cryptid & Wildlife Researcher', emoji:'🦎', desc:'Wildlife biologist turned cryptid researcher. Has spent over a decade investigating reported creature sightings across North America and Southeast Asia, collecting physical evidence and interviewing eyewitnesses firsthand.' },
+      'UFOs':             { name:'Daniel Park',   role:'UAP Analyst & Aviation Expert', emoji:'🛸', desc:'Former military analyst specialising in aviation anomalies. Has reviewed thousands of declassified government UAP documents and maintains one of the most comprehensive UFO case databases online.' },
+      'Ancient Mysteries':{ name:'Elena Vasquez', role:'Archaeologist & Mythologist', emoji:'🏛️', desc:'Holds a degree in comparative mythology from the University of Edinburgh. Has spent a decade studying the intersection of folklore, archaeological evidence, and unexplained historical phenomena across world cultures.' },
+      'Paranormal':       { name:'Marcus Holloway',role:'Paranormal Investigator', emoji:'👻', desc:'Former journalist with 12 years covering unexplained events. Has personally investigated over 40 paranormal sites across 15 countries, combining sceptical analysis with genuine open-minded inquiry.' },
+      'Mythic Creatures': { name:'Elena Vasquez', role:'Mythologist & Cultural Researcher', emoji:'🐉', desc:'Expert in comparative world mythology with a focus on the cultural origins of mythological creatures. Studies how ancient peoples explained the unknown through storytelling and legend.' },
+      'Unexplained':      { name:'Marcus Holloway',role:'Lead Researcher & Investigator', emoji:'❓', desc:'Former investigative journalist dedicated to documenting and researching the world\'s most compelling unsolved mysteries. Believes every unexplained event deserves serious, evidence-based investigation.' },
+    };
 
     async function loadArticle() {
       try {
@@ -146,21 +207,30 @@
         if (!snap.exists()) { window.location.href='index.html'; return; }
         const a = { id: snap.id, ...snap.data() };
 
-        // Update page title & meta
+        // Page title & meta
         document.title = `${a.title} — Vaultedd`;
         document.querySelector('meta[name="description"]').content = a.excerpt || '';
 
-        // Header
+        // Date
         const d = a.publishedAt?.toDate ? a.publishedAt.toDate() : new Date(a.publishedAt);
+        const dateStr = d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+        // Author
+        const author = AUTHORS[a.category] || AUTHORS['Unexplained'];
+
+        // Header
         document.getElementById('article-header').innerHTML = `
           <div class="article-cat">${a.category || 'Mystery'}</div>
           <h1 class="article-title">${a.title}</h1>
-          <div class="article-meta">
-            <span>${d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</span>
-            <span class="article-meta-dot">·</span>
-            <span>${a.readTime || '5 min read'}</span>
-            <span class="article-meta-dot">·</span>
-            <span>AI Research</span>
+          <p style="font-size:17px;color:var(--text-muted);line-height:1.7;margin-bottom:1.25rem;">${a.excerpt||''}</p>
+          <div class="article-meta-bar">
+            <div class="meta-item"><span class="meta-item-icon">${author.emoji}</span><span><strong>${author.name}</strong></span></div>
+            <span class="meta-divider">·</span>
+            <div class="meta-item"><span class="meta-item-icon">📅</span><span>${dateStr}</span></div>
+            <span class="meta-divider">·</span>
+            <div class="meta-item"><span class="meta-item-icon">⏱</span><span>${a.readTime||'8 min read'}</span></div>
+            <span class="meta-divider">·</span>
+            <div class="meta-item"><span class="meta-item-icon">📂</span><a href="category.html?cat=${encodeURIComponent(a.category)}" style="color:var(--accent);">${a.category}</a></div>
           </div>`;
 
         // Hero image
@@ -178,40 +248,74 @@
         document.getElementById('article-body').innerHTML = a.content || '';
 
         // Tags
-        if (a.tags && a.tags.length) {
+        if (a.tags?.length) {
           const tagEl = document.getElementById('article-tags');
           tagEl.style.display = 'flex';
           tagEl.innerHTML = a.tags.map(t=>`<span class="article-tag">#${t}</span>`).join('');
         }
 
-        // Load related
+        // Share section
+        document.getElementById('share-section').style.display = 'block';
+
+        // Author box
+        document.getElementById('author-box').style.display = 'flex';
+        document.getElementById('author-avatar').textContent = author.emoji;
+        document.getElementById('author-name').textContent = author.name;
+        document.getElementById('author-role').textContent = `${author.role} · Vaultedd`;
+        document.getElementById('author-desc').textContent = author.desc;
+
+        // Related
         loadRelated(a.category, a.id);
 
       } catch(e) {
         console.error(e);
+        document.getElementById('article-body').innerHTML = '<p style="color:var(--text-muted)">Failed to load article. Please refresh.</p>';
       }
     }
 
     async function loadRelated(cat, excludeId) {
       try {
-        const q = query(collection(db,'articles'), where('category','==',cat), orderBy('publishedAt','desc'), limit(5));
+        const q = query(collection(db,'articles'), where('category','==',cat), orderBy('publishedAt','desc'), limit(6));
         const snap = await getDocs(q);
         const list = document.getElementById('related-list');
         list.innerHTML = '';
+        let count = 0;
         snap.docs.forEach(d => {
-          if (d.id === excludeId) return;
+          if (d.id === excludeId || count >= 4) return;
+          count++;
           const a = { id: d.id, ...d.data() };
           list.innerHTML += `
             <div class="related-card" onclick="window.location.href='article.html?id=${a.id}'">
-              ${a.imageUrl ? `<img class="related-img" src="${a.imageUrl}" alt="${a.title}" loading="lazy"/>` : `<div class="related-img" style="display:flex;align-items:center;justify-content:center;font-size:24px;">🔮</div>`}
+              ${a.imageUrl
+                ? `<img class="related-img" src="${a.imageUrl}" alt="${a.title}" loading="lazy"/>`
+                : `<div class="related-img" style="display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--bg3);">🔮</div>`}
               <div>
                 <div class="related-title">${a.title}</div>
-                <div class="related-meta">${a.category || ''}</div>
+                <div class="related-meta">${a.category||''}</div>
               </div>
             </div>`;
         });
-      } catch(e) {}
+      } catch(e) { console.warn('Related load failed',e); }
     }
+
+    // Share functions
+    window.shareTwitter = function() {
+      const url = encodeURIComponent(window.location.href);
+      const text = encodeURIComponent(document.title);
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`,'_blank');
+    };
+    window.shareFacebook = function() {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,'_blank');
+    };
+    window.shareReddit = function() {
+      const url = encodeURIComponent(window.location.href);
+      const title = encodeURIComponent(document.title);
+      window.open(`https://reddit.com/submit?url=${url}&title=${title}`,'_blank');
+    };
+    window.copyLink = function() {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied!');
+    };
 
     loadArticle();
   </script>

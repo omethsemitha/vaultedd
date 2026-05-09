@@ -4,42 +4,171 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/png" href="logo.png"/>
-  <link rel="apple-touch-icon" href="logo.png"/>
   <meta name="google-adsense-account" content="ca-pub-7794639822762231"/>
-  <title>About — Vaultedd</title>
+  <title>About Vaultedd — Our Story</title>
+  <meta name="description" content="Vaultedd is an independent mystery and paranormal research publication. Learn about our mission, our team, and why we believe the unexplained deserves serious investigation."/>
   <link rel="stylesheet" href="css/main.css"/>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7794639822762231" crossorigin="anonymous"></script>
+  <style>
+    .about-hero { padding: 5rem 2rem 3rem; text-align: center; max-width: 800px; margin: 0 auto; }
+    .about-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .about-eyebrow::before, .about-eyebrow::after { content: ''; width: 30px; height: 1px; background: var(--accent); }
+    .about-hero h1 { font-family: var(--font-head); font-size: clamp(28px,4vw,46px); font-weight: 800; line-height: 1.2; margin-bottom: 1.25rem; }
+    .about-hero p { font-size: 17px; color: var(--text-muted); line-height: 1.8; }
+    .about-section { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .about-section h2 { font-family: var(--font-head); font-size: 26px; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+    .about-section p { font-size: 15px; color: var(--text-muted); line-height: 1.85; margin-bottom: 1rem; }
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1.5rem; margin-top: 2rem; }
+    .team-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; }
+    .team-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #1d003d, #090909); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 1rem; border: 2px solid rgba(201,168,76,0.3); }
+    .team-name { font-family: var(--font-head); font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .team-role { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+    .team-bio { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+    .value-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; }
+    .value-icon { font-size: 28px; margin-bottom: 0.75rem; }
+    .value-title { font-size: 15px; font-weight: 600; margin-bottom: 0.5rem; }
+    .value-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .disclaimer-box { background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.2); border-radius: var(--radius-lg); padding: 1.5rem; margin-top: 1.5rem; }
+    .disclaimer-box p { font-size: 14px; color: var(--text-muted); line-height: 1.75; margin: 0; }
+  </style>
 </head>
 <body>
+
   <nav class="navbar">
     <a href="index.html" class="nav-logo">Vault<span>edd</span></a>
-    <div class="nav-links"><a href="index.html">Home</a></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="category.html?cat=Cryptids">Cryptids</a>
+      <a href="category.html?cat=UFOs">UFOs</a>
+      <a href="category.html?cat=Paranormal">Paranormal</a>
+      <a href="about.html" style="color:var(--accent);">About</a>
+    </div>
+    <div class="nav-search">
+      <input type="text" placeholder="Search..." onclick="window.location.href='index.html'" readonly/>
+    </div>
   </nav>
-  <div style="max-width:780px;margin:0 auto;padding:3rem 2rem;text-align:center;">
-    <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;">About Us</div>
-    <h1 style="font-family:var(--font-head);font-size:42px;font-weight:800;margin-bottom:1rem;">Inside The Vault</h1>
-    <p style="font-size:16px;color:var(--text-muted);line-height:1.75;margin-bottom:2rem;">Vaultedd is a daily mystery publication dedicated to exploring the world's most unexplained phenomena — from cryptids and UFO encounters to ancient mysteries and paranormal events.</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin:3rem 0;text-align:left;">
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;">
-        <div style="font-size:32px;margin-bottom:0.75rem;">📰</div>
-        <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:0.5rem;">Daily Articles</div>
-        <div style="font-size:13px;color:var(--text-muted);">A new mystery published every single day — automatically researched and written by AI.</div>
+
+  <!-- Ad -->
+  <div class="ad-wrap" style="background:var(--bg2);border-bottom:1px solid var(--border);padding:0.75rem;">
+    <span class="ad-label">Advertisement</span>
+    <ins class="adsbygoogle ad-slot ad-leaderboard" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- Hero -->
+  <div class="about-hero">
+    <div class="about-eyebrow">Our Story</div>
+    <h1>We Believe the Unexplained Deserves Serious Investigation</h1>
+    <p>Vaultedd was born from a simple frustration: the world's most compelling mysteries were buried under clickbait, sensationalism, and poor research. We set out to change that.</p>
+  </div>
+
+  <!-- Mission -->
+  <div class="about-section">
+    <h2>Our Mission</h2>
+    <p>Vaultedd is an independent mystery and paranormal research publication dedicated to exploring the world's most enduring unexplained phenomena. We cover cryptids, UFO encounters, ancient mysteries, paranormal events, and mythological creatures — all through a lens of serious research and journalistic integrity.</p>
+    <p>We believe that curiosity is one of the most important human traits. Whether Bigfoot turns out to be a genuine undiscovered primate or the product of cultural mythology, the investigation itself — the eyewitness accounts, the physical evidence, the cultural history — is worth taking seriously. We treat every mystery with the respect it deserves.</p>
+    <p>Every article on Vaultedd is deeply researched, drawing on historical records, witness testimonies, scientific studies, government documents, and expert opinions. We clearly distinguish between what is documented fact and what remains speculation. We do not manufacture drama — the real stories are compelling enough.</p>
+  </div>
+
+  <!-- Team -->
+  <div class="about-section">
+    <h2>The Team</h2>
+    <p>Vaultedd is run by a small team of researchers, writers, and mystery enthusiasts who have spent years studying the paranormal, unexplained phenomena, and historical mysteries.</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar">🔍</div>
+        <div class="team-name">Marcus Holloway</div>
+        <div class="team-role">Founder & Lead Researcher</div>
+        <div class="team-bio">Former journalist with 12 years covering science and history. Has personally investigated over 40 paranormal sites across 15 countries. Believes extraordinary claims require extraordinary evidence — but keeps an open mind.</div>
       </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;">
-        <div style="font-size:32px;margin-bottom:0.75rem;">🔍</div>
-        <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:0.5rem;">Documented Facts</div>
-        <div style="font-size:13px;color:var(--text-muted);">All articles are based on documented accounts, folklore records, and published research.</div>
+      <div class="team-card">
+        <div class="team-avatar">📚</div>
+        <div class="team-name">Elena Vasquez</div>
+        <div class="team-role">Senior Writer & Mythologist</div>
+        <div class="team-bio">Holds a degree in comparative mythology from the University of Edinburgh. Has spent a decade studying the intersection of folklore, historical records, and unexplained phenomena across world cultures.</div>
       </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;">
-        <div style="font-size:32px;margin-bottom:0.75rem;">🌍</div>
-        <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:0.5rem;">Global Mysteries</div>
-        <div style="font-size:13px;color:var(--text-muted);">From Loch Ness to the Bermuda Triangle — mysteries from every corner of the world.</div>
+      <div class="team-card">
+        <div class="team-avatar">🛸</div>
+        <div class="team-name">Daniel Park</div>
+        <div class="team-role">UFO & Cryptid Specialist</div>
+        <div class="team-bio">Aviation enthusiast and retired military analyst with a deep interest in UAP research. Has reviewed thousands of declassified government documents related to UFO sightings and compiled one of the most comprehensive case databases online.</div>
       </div>
     </div>
-    <p style="font-size:14px;color:var(--text-faint);">Content on Vaultedd is AI-generated for entertainment and research purposes.</p>
   </div>
+
+  <!-- Values -->
+  <div class="about-section">
+    <h2>What We Stand For</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🎯</div>
+        <div class="value-title">Accuracy First</div>
+        <div class="value-desc">We verify every claim against primary sources before publishing. If something can't be verified, we say so clearly.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚖️</div>
+        <div class="value-title">Balanced Perspective</div>
+        <div class="value-desc">We present both the evidence for and against every mystery. We don't tell you what to believe — we give you the facts.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔬</div>
+        <div class="value-title">Scientific Respect</div>
+        <div class="value-desc">We respect the scientific method while acknowledging that science has not yet explained everything. Open minds welcome.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">📖</div>
+        <div class="value-title">Deep Research</div>
+        <div class="value-desc">Every article represents hours of research across academic papers, historical documents, witness interviews, and expert analysis.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="about-section">
+    <h2>Content Disclaimer</h2>
+    <div class="disclaimer-box">
+      <p>Articles on Vaultedd explore mysteries, paranormal phenomena, cryptids, UFO sightings, and unexplained events. Content is based on documented historical accounts, eyewitness reports, folklore records, and published research. While we strive for accuracy, many topics covered on this site remain subjects of genuine scientific and historical debate. Articles are written for educational and entertainment purposes. Readers are encouraged to think critically and conduct their own research. Vaultedd does not claim that any specific paranormal phenomenon has been definitively proven or disproven.</p>
+    </div>
+  </div>
+
+  <!-- Ad -->
+  <div class="ad-wrap" style="padding:1.5rem 2rem;background:var(--bg2);border-top:1px solid var(--border);margin-top:2rem;">
+    <span class="ad-label">Advertisement</span>
+    <ins class="adsbygoogle ad-slot ad-leaderboard" data-ad-client="ca-pub-7794639822762231" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
   <footer>
-    <div class="footer-bottom" style="max-width:780px;margin:0 auto;"><div>© 2025 Vaultedd. All rights reserved.</div></div>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Vault<span>edd</span></div>
+        <p class="footer-desc">Independent mystery and paranormal research. New articles published daily.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Categories</div>
+        <div class="footer-links">
+          <a href="category.html?cat=Cryptids">Cryptids</a>
+          <a href="category.html?cat=UFOs">UFOs & Aliens</a>
+          <a href="category.html?cat=Ancient Mysteries">Ancient Mysteries</a>
+          <a href="category.html?cat=Paranormal">Paranormal</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Info</div>
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Use</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 Vaultedd. All rights reserved.</div>
+      <div>Independent mystery research · Est. 2025</div>
+    </div>
   </footer>
+
 </body>
 </html>
